@@ -1,114 +1,66 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { categories } from '../data/products';
-// import { productOptions } from '../data/productOptions';
-import { Clock, Info, Banknote, User } from 'lucide-react';
+import { productOptions } from '../data/productOptions';
 
 export const Home: React.FC = () => {
-    // Check if product requires customization options
-    const getProductLink = (productId: string) => {
-        // In original PHP: if hasOptions -> produto.php?id=... else -> carrinho.php?action=add_simple
-        // In React: we will route everything to Product details for consistency, or we could direct-add.
-        // For simplicity and better UX, routing everything to details is safer for now, 
-        // or we can implement direct-add logic later.
-        return `/product/${productId}`;
-    };
-
     return (
-        <div className="bg-[#f5f5f5] min-h-screen pb-20">
-            {/* Header Image */}
-            <header className="relative w-full h-[180px] bg-gray-300">
-                <img
-                    src="https://images.multipedidos.com.br/covers/0PHIJwC26ZxGoBDTdXOR5h4nukmEAJafiLTwh9EtVcq8p3jrHUSMOYs8F5tbeRBz.jpg"
-                    alt="Cover"
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 flex flex-col p-4">
-                    <div className="absolute top-4 right-4 flex items-center gap-2 text-white font-medium text-sm">
-                        <div className="w-6 h-6 border-2 border-white rounded-full flex items-center justify-center">
-                            <User size={14} />
-                        </div>
+        <div className="pb-20">
+            {/* Header */}
+            <header className="header-container">
+                <img src="https://images.multipedidos.com.br/covers/0PHIJwC26ZxGoBDTdXOR5h4nukmEAJafiLTwh9EtVcq8p3jrHUSMOYs8F5tbeRBz.jpg" alt="Background da pizzaria" className="header-background" />
+                <div className="header-overlay">
+                    <div className="header-login">
+                        <div className="icon-user"></div>
                         Entrar
                     </div>
                 </div>
             </header>
 
-            {/* Store Info */}
-            <div className="bg-white p-5 text-center -mt-1 relative rounded-t-2xl shadow-sm z-10">
-                <h1 className="text-xl font-bold mb-1 text-[#333]">TERRITORIO DA PIZZA E HAMBURGUERIA LTDA</h1>
-                <p className="text-[#007bff] text-sm mb-5">A 5 kilometros de você</p>
-
-                <div className="flex justify-around mb-5 border-b pb-4 border-gray-100">
-                    <div><strong className="block text-sm font-medium">Entrega</strong><span className="text-xs text-gray-500">45min - 1h</span></div>
-                    <div><strong className="block text-sm font-medium">Levantamento</strong><span className="text-xs text-gray-500">35min</span></div>
+            <div className="store-info">
+                <h1>TERRITORIO DA PIZZA E HAMBURGUERIA LTDA</h1>
+                <p className="address">A 5 kilometros de você</p>
+                <div className="delivery-info">
+                    <div><strong>Entrega</strong><span>45min - 1h 0min</span></div>
+                    <div><strong>Levantamento</strong><span>35min</span></div>
                 </div>
-
-                <div className="flex justify-around mb-5">
-                    <div className="flex flex-col items-center gap-2 text-xs text-gray-500">
-                        <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center">
-                            <Banknote size={20} className="text-gray-400" />
-                        </div>
-                        Pagamentos
-                    </div>
-                    <div className="flex flex-col items-center gap-2 text-xs text-gray-500">
-                        <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center">
-                            <Clock size={20} className="text-gray-400" />
-                        </div>
-                        Horários
-                    </div>
-                    <div className="flex flex-col items-center gap-2 text-xs text-gray-500">
-                        <div className="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center">
-                            <Info size={20} className="text-gray-400" />
-                        </div>
-                        Informações
-                    </div>
+                <div className="main-icons">
+                    <div className="icon-group"><div className="icon-shape"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg></div>Pagamentos</div>
+                    <div className="icon-group"><div class="icon-shape"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" /></svg></div>Horários</div>
+                    <div className="icon-group"><div className="icon-shape"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2zm0 4h2v6h-2z" /></svg></div>Informações</div>
                 </div>
-
-                <div className="text-gray-500 text-sm">
-                    Funcionamento<br />
-                    <span className="text-[#d92d2d] font-bold">ABERTO</span>
-                </div>
+                <div className="store-status">Funcionamento<br /><span>ABERTO</span></div>
             </div>
 
-            {/* Banner */}
-            <div className="my-4">
-                <img src="https://images.multipedidos.com.br/highlightImages/27503ed69244083d45c8664a938f81f0f29c0688042905601f69e45e060ac890/lg_27503ed69244083d45c8664a938f81f0f29c0688042905601f69e45e060ac890.jpg" alt="Açaí Banner" className="w-full h-auto" />
+            <div className="banner">
+                <img src="https://images.multipedidos.com.br/highlightImages/27503ed69244083d45c8664a938f81f0f29c0688042905601f69e45e060ac890/lg_27503ed69244083d45c8664a938f81f0f29c0688042905601f69e45e060ac890.jpg" alt="Açaí no Copo" />
             </div>
 
-            {/* Categories */}
-            <main className="space-y-3">
-                {Object.entries(categories).map(([category, products]) => (
-                    <section key={category} className="bg-white">
-                        <h2 className="text-lg font-medium p-4 border-b border-gray-100 text-[#333]">{category}</h2>
-                        <div className="px-4">
-                            {products.map(product => (
-                                <Link to={getProductLink(product.id)} key={product.id} className="block border-b border-gray-100 last:border-0 py-4">
-                                    <div className="flex items-center">
-                                        <img
-                                            src={product.image_url}
-                                            alt={product.name}
-                                            className="w-20 h-20 object-cover rounded-lg mr-4 flex-shrink-0 bg-gray-100"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-[15px] font-medium text-[#333] mb-1 line-clamp-2">{product.name}</h3>
-                                            <p className="text-[13px] text-gray-500 mb-2 line-clamp-2">{product.description}</p>
-
-                                            <div className="flex items-center gap-2">
-                                                {product.old_price && (
-                                                    <span className="text-[13px] text-gray-400 line-through">R$ {product.old_price.replace('.', ',')}</span>
-                                                )}
-                                                <span className="text-[15px] font-medium text-[#333]">R$ {product.price.replace('.', ',')}</span>
+            <main className="main-content">
+                {Object.entries(categories).map(([categoryName, products]) => (
+                    <section key={categoryName} className="category-section">
+                        <h2 className="category-title">{categoryName}</h2>
+                        <div className="product-list">
+                            {products.map(product => {
+                                const hasOptions = !!productOptions[product.id];
+                                // Direct cart add logic would be handled in Product page or immediate action, keeping simple link for now
+                                return (
+                                    <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
+                                        <div className="product-card">
+                                            <img src={product.image_url} alt={product.name} className="product-image" />
+                                            <div className="details">
+                                                <h3>{product.name}</h3>
+                                                <p className="description">{product.description}</p>
+                                                <div className="price-info">
+                                                    {product.old_price && <span className="old-price">R$ {product.old_price}</span>}
+                                                    <span className="price">R$ {product.price}</span>
+                                                </div>
+                                                {product.promo_text && <div className="promo-tag">{product.promo_text}</div>}
                                             </div>
-
-                                            {product.promo_text && (
-                                                <span className="inline-block mt-2 bg-[#d92d2d] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                                                    {product.promo_text}
-                                                </span>
-                                            )}
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </section>
                 ))}

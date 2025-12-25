@@ -1,40 +1,31 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Utensils, User } from 'lucide-react';
-import { useCart } from '../context/CartContext';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { totalItems } = useCart();
     const location = useLocation();
-
-    const isActive = (path: string) => location.pathname === path ? 'text-white' : 'text-white/70';
+    // Legacy: Footer nav only appears on index.php (Home)
+    // We might want it on other pages if added later, but definitely not on Cart/Checkout/Product
+    const showFooter = location.pathname === '/' || location.pathname === '/menu';
 
     return (
-        <div className="container relative bg-white">
-            {/* Footer Navigation */}
-            <nav className="fixed bottom-0 left-0 w-full h-[60px] bg-[#d92d2d] flex justify-around items-center border-t border-[#c12222] z-50 max-w-[600px] left-1/2 -translate-x-1/2">
-                <Link to="/" className={`flex flex-col items-center no-underline text-xs ${isActive('/')}`}>
-                    <Utensils size={24} className="mb-1" />
-                    <span>Cardápio</span>
-                </Link>
-                <Link to="/cart" className={`flex flex-col items-center no-underline text-xs ${isActive('/cart')} relative`}>
-                    <ShoppingBag size={24} className="mb-1" />
-                    <span>Pedidos</span>
-                    {totalItems > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-white text-[#d92d2d] text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                            {totalItems}
-                        </span>
-                    )}
-                </Link>
-                <div className="flex flex-col items-center no-underline text-xs text-white/70 opacity-50 cursor-not-allowed">
-                    <User size={24} className="mb-1" />
-                    <span>Perfil</span>
-                </div>
-            </nav>
-
-            <div className="app-content min-h-screen">
-                {children}
-            </div>
-        </div>
+        <>
+            {children}
+            {showFooter && (
+                <footer className="footer-nav">
+                    <Link to="/">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                        Cardápio
+                    </Link>
+                    <Link to="/cart">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" /></svg>
+                        Pedidos
+                    </Link>
+                    <Link to="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                        Perfil
+                    </Link>
+                </footer>
+            )}
+        </>
     );
 };

@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export const Checkout: React.FC = () => {
     const { subtotal, items, clearCart } = useCart();
-    // const navigate = useNavigate();
-    const [step, setStep] = useState(1); // 1: Info/Address, 2: Payment
+    const navigate = useNavigate();
+    const [step, setStep] = useState(1); // 1: Address, 2: Payment
 
+    // Using simple state instead of separate routes to keep SPA feel while mimicing pages
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
         cpf: '',
+        email: '',
         cep: '',
-        address: '',
-        number: '',
+        address_street: '',
+        address_number: '',
+        complement: '',
         neighborhood: '',
         reference: '',
-        paymentMethod: ''
+        city: '',
+        state: ''
     });
 
     const deliveryFee = 6.00; // Fixed for MVP
@@ -34,9 +38,10 @@ export const Checkout: React.FC = () => {
                 if (!data.erro) {
                     setFormData(prev => ({
                         ...prev,
-                        address: data.logradouro,
+                        address_street: data.logradouro,
                         neighborhood: data.bairro,
-                        // city: data.localidade...
+                        city: data.localidade,
+                        state: data.uf
                     }));
                 }
             } catch (e) {
@@ -45,76 +50,135 @@ export const Checkout: React.FC = () => {
         }
     };
 
-    const handlePayment = async (method: string) => {
-        if (method === 'pix') {
-            // Generate PIX via Netlify Function
-            // For MVP demo, we'll just simulate success or redirect
-            // In real app, call /api/create-pix
-        }
+    const handleAddressSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setStep(2);
+        window.scrollTo(0, 0);
+    };
 
+    const handlePayment = async (method: string) => {
         // WhatsApp Generation
-        const message = `*NOVO PEDIDO*\nCliente: ${formData.name}\nEndereço: ${formData.address}, ${formData.number}\nTotal: R$ ${total.toFixed(2)}\nPagamento: ${method}`;
+        const message = `*NOVO PEDIDO*\nCliente: ${formData.name}\nEndereço: ${formData.address_street}, ${formData.address_number} - ${formData.neighborhood}\nTotal: R$ ${total.toFixed(2)}\nPagamento: ${method}`;
         const waLink = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
 
-        // Clear cart and redirect
+        // In real app: Call Netlify Function for PIX if method === 'pix'
+
         clearCart();
         window.location.href = waLink;
     };
 
-    if (items.length === 0) return <div className="p-10 text-center">Carrinho vazio</div>;
+    if (items.length === 0) return <div className="empty-cart-message">Carrinho vazio</div>;
 
     return (
-        <div className="bg-[#f5f5f5] min-h-screen pb-20">
-            <header className="bg-[#d92d2d] text-white p-4">
-                <h1 className="font-medium">{step === 1 ? 'Dados de Entrega' : 'Pagamento'}</h1>
-            </header>
+        <div className="checkout-page">
+            {step === 1 && (
+                <>
+                    <header className="header">
+                        <Link to="/cart">&lt;</Link>
+                        <h1>Endereço e Contato</h1>
+                    </header>
 
-            <main className="p-4">
-                {step === 1 && (
-                    <div className="bg-white p-5 rounded-lg shadow-sm space-y-4">
-                        <h2 className="font-bold border-b pb-2">Seus Dados</h2>
-                        <input name="name" placeholder="Nome Completo" className="w-full p-3 border rounded" onChange={handleInput} />
-                        <input name="phone" placeholder="Telefone" className="w-full p-3 border rounded" onChange={handleInput} />
-                        <input name="cpf" placeholder="CPF (Obrigatório para Pix)" className="w-full p-3 border rounded" onChange={handleInput} />
+                    <div className="form-container">
+                        <form id="addressForm" onSubmit={handleAddressSubmit}>
+                            <h2 className="section-title">Seus Dados</h2>
+                            <div className="form-group">
+                                <label htmlFor="name">Nome Completo</label>
+                                <input type="text" id="name" name="name" required placeholder="Seu nome completo" onChange={handleInput} />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="phone">Telefone / WhatsApp</label>
+                                <input type="tel" id="phone" name="phone" required placeholder="(99) 99999-9999" onChange={handleInput} />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="cpf">CPF (Obrigatório para o PIX)</label>
+                                <input type="text" id="cpf" name="cpf" required placeholder="000.000.000-00" onChange={handleInput} />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="email">Email (Opcional)</label>
+                                <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" onChange={handleInput} />
+                            </div>
 
-                        <h2 className="font-bold border-b pb-2 pt-4">Endereço</h2>
-                        <input name="cep" placeholder="CEP" className="w-full p-3 border rounded" onChange={handleInput} onBlur={handleCepBlur} />
-                        <input name="address" placeholder="Endereço" className="w-full p-3 border rounded" value={formData.address} onChange={handleInput} />
-                        <div className="flex gap-2">
-                            <input name="number" placeholder="Número" className="w-1/3 p-3 border rounded" onChange={handleInput} />
-                            <input name="neighborhood" placeholder="Bairro" className="w-2/3 p-3 border rounded" value={formData.neighborhood} onChange={handleInput} />
-                        </div>
-                        <input name="reference" placeholder="Ponto de Referência" className="w-full p-3 border rounded" onChange={handleInput} />
+                            <h2 className="section-title">Endereço de Entrega</h2>
 
-                        <button onClick={() => setStep(2)} className="w-full bg-gray-800 text-white p-4 rounded font-bold mt-4">IR PARA PAGAMENTO</button>
+                            <div>
+                                <div className="form-group">
+                                    <label htmlFor="cep">CEP</label>
+                                    <input type="tel" id="cep" name="cep" placeholder="00000-000" required onChange={handleInput} onBlur={handleCepBlur} />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="address_street">Endereço</label>
+                                    <input type="text" id="address_street" name="address_street" placeholder="Rua, Avenida..." required value={formData.address_street} onChange={handleInput} />
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="address_number">Número</label>
+                                        <input type="text" id="address_number" name="address_number" required onChange={handleInput} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="complement">Complemento</label>
+                                        <input type="text" id="complement" name="complement" placeholder="Apto, Bloco..." onChange={handleInput} />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="neighborhood">Bairro</label>
+                                    <input type="text" id="neighborhood" name="neighborhood" required value={formData.neighborhood} onChange={handleInput} />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="reference">Ponto de Referência (obrigatório)</label>
+                                    <input type="text" id="reference" name="reference" required onChange={handleInput} />
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                )}
 
-                {step === 2 && (
-                    <div className="space-y-4">
-                        <div className="bg-white p-5 rounded-lg shadow-sm">
-                            <h2 className="font-bold mb-4">Resumo</h2>
-                            <div className="flex justify-between mb-2"><span>Subtotal</span><span>R$ {subtotal.toFixed(2)}</span></div>
-                            <div className="flex justify-between mb-2"><span>Taxa de Entrega</span><span>R$ {deliveryFee.toFixed(2)}</span></div>
-                            <div className="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span className="text-[#d92d2d]">R$ {total.toFixed(2)}</span></div>
+                    <footer className="checkout-footer">
+                        <button type="submit" form="addressForm" className="btn-confirm">✓ CONFIRMAR DADOS</button>
+                    </footer>
+                </>
+            )}
+
+            {step === 2 && (
+                <>
+                    <header className="header">
+                        <button onClick={() => setStep(1)}>&lt;</button>
+                        <h1>Terminar Pedido</h1>
+                    </header>
+
+                    <div className="cart-container">
+                        <div className="summary">
+                            <div className="summary-row">
+                                <span>Pedido</span>
+                                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            <div className="summary-row">
+                                <span>Taxa de entrega</span>
+                                <span>R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            <div className="summary-row total">
+                                <span>Total a pagar</span>
+                                <span>R$ {total.toFixed(2).replace('.', ',')}</span>
+                            </div>
                         </div>
 
-                        <div className="bg-white p-5 rounded-lg shadow-sm">
-                            <h2 className="font-bold mb-4 text-center text-gray-600">Escolha a forma de pagamento</h2>
-                            <div className="flex gap-3">
-                                <button onClick={() => handlePayment('delivery')} className="flex-1 p-6 border rounded hover:shadow-md text-center">
-                                    <div className="font-bold mb-1">Na Entrega</div>
-                                    <div className="text-xs text-gray-500">Dinheiro/Cartão</div>
-                                </button>
-                                <button onClick={() => handlePayment('pix')} className="flex-1 p-6 border rounded hover:shadow-md text-center">
-                                    <div className="font-bold mb-1 text-[#00A39C]">PIX</div>
-                                    <div className="text-xs text-gray-500">Online (Aprovação rápida)</div>
-                                </button>
+                        <div className="payment-options">
+                            <h2>Qual a forma de pagamento?</h2>
+                            <div className="options-container">
+                                <div onClick={() => handlePayment('delivery')} className="payment-option">
+                                    {/* Icons would be clearer with FontAwesome or SVG maps, using text for now or simple SVG */}
+                                    {/* Simple Wallet Icon */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg>
+                                    <span>Pagar na Entrega</span>
+                                </div>
+                                <div onClick={() => handlePayment('pix')} className="payment-option">
+                                    {/* PIX Icon */}
+                                    <svg className="pix" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" /></svg>
+                                    <span>Pix</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                )}
-            </main>
+                </>
+            )}
         </div>
     );
 };
